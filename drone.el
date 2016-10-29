@@ -3,8 +3,10 @@
 ;; Copyright (C) 2016  Oliver Marks
 
 ;; Author: Oliver Marks <oly@digitaloctave.com>
-;; Keywords: drone ci
-;; Version: 0.0.1
+;; URL: https://github.com/olymk2/emacs-drone
+;; Keywords: Drone Tests Ci
+;; Version: 0.1
+;; Created 29 October 2016
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -21,17 +23,25 @@
 
 ;;; Commentary:
 
-;; This package will look for drone.yml in your current project and launch your tests
+;; This provides a single non interactive command which will launch this shell command "drone exec"
+;; This will look for a .drone.yml file and run the command from this path
+;; The output of running the tests will be displayed to the user 
+;; Drone is an application that runs your tests using docker, it can run both locally and on drone.io server
 
 ;;; Code:
-(require 'projectile)
 
+(defun dc-drone-root ()
+  (locate-dominating-file default-directory ".drone.yml"))
+
+;;;###autoload
 (defun drone-exec ()
   (interactive)
-  (let ((dotdronefile (format "%s.drone.yml" (projectile-project-root))))
-    ;;(message dotdronefile)
-    (if (file-exists-p dotdronefile)
-        (shell-command (format "cd %s;drone exec &" (projectile-project-root)))
-      (message "Missing drone file @%s" dotdronefile))))
+  (let ((default-directory (dc-drone-root)))
+    (let ((dotdronefile (format "%s.drone.yml" default-directory)))
+      (message dotdronefile)
+      (if (file-exists-p dotdronefile)
+        (shell-command (format "drone exec &"))
+        (message "Missing drone file @%s" dotdronefile)))))
 
 ;;; drone.el ends here
+(provide 'drone) 
