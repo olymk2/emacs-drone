@@ -1,4 +1,4 @@
-;;; drone.el --- a simple package                     -*- lexical-binding: t; -*-
+;;; drone.el --- Launch your drone test suite, searches for drone.yml and runs if found                     -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016  Oliver Marks
 
