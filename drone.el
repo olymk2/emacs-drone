@@ -30,18 +30,18 @@
 
 ;;; Code:
 
-(defun dc-drone-root ()
-  (locate-dominating-file default-directory ".drone.yml"))
+(defun drone-root ()
+  (condition-case nil
+    (let ((root-path (locate-dominating-file default-directory ".drone.yml")))
+      (if root-path
+        root-path
+        (error "Missing .drone.yml not found in directory tree")))))
 
 ;;;###autoload
 (defun drone-exec ()
   (interactive)
-  (let ((default-directory (dc-drone-root)))
-    (let ((dotdronefile (format "%s.drone.yml" default-directory)))
-      (message dotdronefile)
-      (if (file-exists-p dotdronefile)
-        (shell-command (format "drone exec &"))
-        (message "Missing drone file @%s" dotdronefile)))))
+  (let ((default-directory (drone-root)))
+    (compilation-start (format "drone exec"))))
 
 ;;; drone.el ends here
 (provide 'drone) 
