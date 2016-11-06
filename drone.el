@@ -1,4 +1,4 @@
-;;; drone.el --- Launch your drone test suite, searches for drone.yml and runs if found                     -*- lexical-binding: t; -*-
+;;; drone.el --- Launch your drone test suite if drone.yml is present  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016  Oliver Marks
 
@@ -23,25 +23,28 @@
 
 ;;; Commentary:
 
-;; This provides a single non interactive command which will launch this shell command "drone exec"
-;; This will look for a .drone.yml file and run the command from this path
-;; The output of running the tests will be displayed to the user 
-;; Drone is an application that runs your tests using docker, it can run both locally and on drone.io server
+;; This provides a single interactive command which will run the
+;; shell command "drone exec".  This will look for a .drone.yml file
+;; and run the command from this path.  The output of running the
+;; tests will be displayed to the user.  Drone is an application that
+;; runs your tests using docker, it can run both locally and on
+;; drone.io server.
 
 ;;; Code:
 
 (defun drone-root ()
-  (condition-case nil
-    (let ((root-path (locate-dominating-file default-directory ".drone.yml")))
-      (if root-path
-        root-path
-        (error "Missing .drone.yml not found in directory tree")))))
+  (or (locate-dominating-file default-directory ".drone.yml")
+      (error "Missing .drone.yml not found in directory tree")))
 
 ;;;###autoload
 (defun drone-exec ()
+  "Run \"drone exec\" where .drone.yml is found."
   (interactive)
   (let ((default-directory (drone-root)))
-    (compilation-start (format "drone exec"))))
+    (with-current-buffer (get-buffer-create (concat "*drone: " default-directory "*"))
+      (compilation-start (format "drone exec")
+                         nil
+                         (lambda (_) (buffer-name))))))
 
+(provide 'drone)
 ;;; drone.el ends here
-(provide 'drone) 
