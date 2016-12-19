@@ -30,6 +30,8 @@
 
 ;;; Code:
 
+(require 'magit-popup)
+
 (defun drone-root ()
   (condition-case nil
     (let ((root-path (locate-dominating-file default-directory ".drone.yml")))
@@ -37,11 +39,21 @@
         root-path
         (error "Missing .drone.yml not found in directory tree")))))
 
+  ;;;###autoload (autoload 'drone-options-popup "magit" nil t)
+(magit-define-popup drone-exec-popup
+  "Show popup buffer featuring tagging commands."
+  'magit-commands
+  :man-page "drone"
+  :switches '((?t "Trusted Repo" "--repo.trusted"))
+  :actions  '((?d "run" drone-exec))
+  :default-action 'drone-exec)
+
 ;;;###autoload
-(defun drone-exec ()
-  (interactive)
+(defun drone-exec (&optional args)
+  (interactive (list (drone-exec-arguments)))
   (let ((default-directory (drone-root)))
-    (compilation-start (format "drone exec"))))
+    (compilation-start (format "drone exec %s" (mapconcat 'identity args " ")))))
+
 
 ;;; drone.el ends here
 (provide 'drone) 
