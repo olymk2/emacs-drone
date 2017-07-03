@@ -39,7 +39,8 @@
         root-path
         (error "Missing .drone.yml not found in directory tree")))))
 
-  ;;;###autoload (autoload 'drone-options-popup "magit" nil t)
+
+;;;###autoload (autoload 'drone-options-popup "magit" nil t)
 (magit-define-popup drone-exec-popup
   "Show popup buffer featuring tagging commands."
   'magit-commands
@@ -48,9 +49,18 @@
   :actions  '((?d "run" drone-exec))
   :default-action 'drone-exec)
 
+
+(defun close-compation-buffer-on-success (status code message)
+  (when (zerop code)
+    (bury-buffer)
+    (delete-window (get-buffer-window (get-buffer "*compilation*"))))
+  (cons message code))
+
+
 ;;;###autoload
 (defun drone-exec (&optional args)
   (interactive (list (drone-exec-arguments)))
+  (setq compilation-exit-message-function 'close-compation-buffer-on-success)
   (let ((default-directory (drone-root)))
     (compilation-start (format "drone exec %s" (mapconcat 'identity args " ")))))
 
